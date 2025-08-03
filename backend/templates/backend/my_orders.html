@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Orders</title>
+</head>
+<body>
+    <h2>My Orders</h2>
+
+    {% if orders %}
+        <table border="1" cellpadding="8">
+            <tr>
+                <th>Type</th>
+                <th>Asset</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Remaining</th>
+                <th>Status</th>
+                <th>Created</th>
+            </tr>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.type|upper }}</td>
+                    <td>{{ order.base_currency }}/{{ order.quote_currency }}</td>
+                    <td>{{ order.price }}</td>
+                    <td>{{ order.quantity }}</td>
+                    <td>{{ order.remaining_quantity }}</td>
+                    <td>{{ order.status|title }}</td>
+                    <td>{{ order.created_at }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>You have not placed any orders yet.</p>
+    {% endif %}
+</body>
+</html>

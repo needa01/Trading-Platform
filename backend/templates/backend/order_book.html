@@ -1,45 +1,116 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Live Order Book</title>
+  </head>
+  <body>
+    <h2>Order Book</h2>
 
-{% block content %}
+    <!-- ✅ Live LTP Section -->
+    <p><strong>Live LTP:</strong> <span id="ltp">Loading...</span></p>
+    <div id="orderbook-container">
+      <h3>Buy Orders</h3>
+      {% if buy_orders %}
+      <table border="1" cellpadding="8">
+        <tr>
+          <th>User</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Remaining</th>
+          <th>Asset</th>
+          <th>Action</th>
+        </tr>
+        {% for order in buy_orders %}
+        <tr>
+          <td>{{ order.user.username }}</td>
+          <td>{{ order.price }}</td>
+          <td>{{ order.quantity }}</td>
+          <td>{{ order.remaining_quantity }}</td>
+          <td>{{ order.base_currency }}/{{ order.quote_currency }}</td>
+          <td>
+            {% if order.user == request.user and order.status == 'pending' %}
+            <a href="{% url 'cancel_order' order.id %}">Cancel</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% else %}
+      <p>No buy orders.</p>
+      {% endif %}
 
+      <h3>Sell Orders</h3>
+      {% if sell_orders %}
+      <table border="1" cellpadding="8">
+        <tr>
+          <th>User</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Remaining</th>
+          <th>Asset</th>
+          <th>Action</th>
+        </tr>
+        {% for order in sell_orders %}
+        <tr>
+          <td>{{ order.user.username }}</td>
+          <td>{{ order.price }}</td>
+          <td>{{ order.quantity }}</td>
+          <td>{{ order.remaining_quantity }}</td>
+          <td>{{ order.base_currency }}/{{ order.quote_currency }}</td>
+          <td>
+            {% if order.user == request.user and order.status == 'pending' %}
+            <a href="{% url 'cancel_order' order.id %}">Cancel</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% else %}
+      <p>No sell orders.</p>
+      {% endif %}
+    </div>
+    <!-- ✅ WebSocket JS goes here -->
+    <script>
+      function connectSocket() {
+        const socket = new WebSocket(
+          "ws://" + window.location.host + "/ws/orderbook/"
+        );
 
-<h2>Buy Orders</h2>
-<table border="1">
-  <tr>
-    <th>User</th>
-    <th>Price</th>
-    <th>Qty</th>
-    <th>Remaining</th>
-    <th>Status</th>
-  </tr>
-  {% for order in buy_orders %}
-  <tr>
-    <td>{{ order.user.username }}</td>
-    <td>{{ order.price }}</td>
-    <td>{{ order.quantity }}</td>
-    <td>{{ order.remaining_quantity }}</td>
-    <td>{{ order.status }}</td>
-  </tr>
-  {% endfor %}
-</table>
+        socket.onopen = () => console.log("WebSocket connected");
 
-<h2>Sell Orders</h2>
-<table border="1">
-  <tr>
-    <th>User</th>
-    <th>Price</th>
-    <th>Qty</th>
-    <th>Remaining</th>
-    <th>Status</th>
-  </tr>
-  {% for order in sell_orders %}
-  <tr>
-    <td>{{ order.user.username }}</td>
-    <td>{{ order.price }}</td>
-    <td>{{ order.quantity }}</td>
-    <td>{{ order.remaining_quantity }}</td>
-    <td>{{ order.status }}</td>
-  </tr>
-  {% endfor %}
-</table>
-{% endblock %}
+        socket.onmessage = function (event) {
+          const data = JSON.parse(event.data);
+          console.log("Received:", data);
+
+          if (data.type === "orderbook_update") {
+            document.getElementById("ltp").innerText =
+              data.ltp + " " + data.asset;
+
+            // Optionally, reload part of the order book
+            fetch("/orderbook/partial/") // You must set up this endpoint
+              .then((res) => res.text())
+              .then((html) => {
+                document.getElementById("orderbook-container").innerHTML = html;
+              });
+          }
+
+          if (data.type === "notification") {
+            alert("🔔 " + data.message);
+          }
+        };
+
+        socket.onclose = function (e) {
+          console.warn("WebSocket closed. Reconnecting in 3s...");
+          setTimeout(connectSocket, 3000);
+        };
+
+        socket.onerror = function (err) {
+          console.error("WebSocket error:", err);
+          socket.close();
+        };
+      }
+
+      connectSocket();
+    </script>
+  </body>
+</html>

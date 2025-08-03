@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Portfolio</title>
+</head>
+<body>
+    <h2>Portfolio Overview</h2>
+
+    {% if portfolio %}
+        <table border="1" cellpadding="8">
+            <tr>
+                <th>Asset</th>
+                <th>Quantity</th>
+                <th>Average Price</th>
+                <th>LTP</th>
+                <th>Current Value</th>
+            </tr>
+            {% for p in portfolio %}
+                <tr>
+                    <td>{{ p.asset_name }}</td>
+                    <td>{{ p.quantity }}</td>
+                    <td>{{ p.avg_price }}</td>
+                    <td>{{ p.ltp }}</td>
+                    <td>{{ p.current_value }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>You have no assets yet.</p>
+    {% endif %}
+
+</body>
+</html>

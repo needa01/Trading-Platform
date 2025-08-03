@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Last Traded Prices</title>
+</head>
+<body>
+    <h2>Last Traded Prices (LTP)</h2>
+
+    {% if ltps %}
+        <table border="1" cellpadding="8">
+            <tr>
+                <th>Name</th>
+                <th>Symbol</th>
+                <th>Price</th>
+                <th>Last Updated</th>
+            </tr>
+            {% for coin in ltps %}
+                <tr>
+                    <td>{{ coin.name }}</td>
+                    <td>{{ coin.symbol }}</td>
+                    <td>{{ coin.last_traded_price }}</td>
+                    <td>{{ coin.last_updated|date:"Y-m-d H:i:s" }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No LTP data available.</p>
+    {% endif %}
+</body>
+</html>

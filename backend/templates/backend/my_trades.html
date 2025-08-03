@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Trade History</title>
+</head>
+<body>
+    <h2>My Trades</h2>
+
+    {% if trades %}
+        <table border="1" cellpadding="8">
+            <tr>
+                <th>Type</th>
+                <th>Asset</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Counterparty</th>
+                <th>Time</th>
+            </tr>
+            {% for trade in trades %}
+                <tr>
+                    <td>
+                        {% if trade.buyer == request.user %}
+                            Buy
+                        {% else %}
+                            Sell
+                        {% endif %}
+                    </td>
+                    <td>{{ trade.buy_order.base_currency }}</td>
+                    <td>{{ trade.price }}</td>
+                    <td>{{ trade.quantity }}</td>
+                    <td>
+                        {% if trade.buyer == request.user %}
+                            {{ trade.seller.username }}
+                        {% else %}
+                            {{ trade.buyer.username }}
+                        {% endif %}
+                    </td>
+                    <td>{{ trade.traded_at }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No trades found.</p>
+    {% endif %}
+</body>
+</html>

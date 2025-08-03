@@ -1,10 +1,16 @@
-from django.shortcuts import render
+from decimal import Decimal
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.db import transaction
+from django.db.models import Q
 
 # Create your views here.
 # from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from .models import Orders, Trades
+
+from backend.engine import match_order
+from .models import Market, Orders, Portfolio, Trades, Wallet
 
 @login_required
 def staff_order_book(request):
@@ -16,8 +22,162 @@ def staff_order_book(request):
     })
 
 @login_required
-def staff_trade_history(request):
+def staff_trades(request):
     trades = Trades.objects.all().order_by('-traded_at')[:100]
     return render(request, 'backend/trade_history.html', {
         'trades': trades,
     })
+    
+@login_required
+@transaction.atomic
+def place_order(request):
+    if request.method == "POST":
+        user = request.user
+        order_type = request.POST.get("type")  # 'buy' or 'sell'
+        price = Decimal(request.POST.get("price"))
+        quantity = Decimal(request.POST.get("quantity"))
+        base = request.POST.get("base_currency")   # e.g., BTC
+        quote = request.POST.get("quote_currency") # e.g., USDT
+
+        wallet = Wallet.objects.select_for_update().get(user=user)
+
+        if order_type == "buy":
+            total_cost = price * quantity
+            if wallet.available_balance < total_cost:
+                return JsonResponse({"error": "Insufficient funds"}, status=400)
+            wallet.available_balance -= total_cost
+            wallet.locked_balance += total_cost
+            wallet.save()
+
+        elif order_type == "sell":
+            try:
+                portfolio = Portfolio.objects.select_for_update().get(user=user, asset_name=base)
+            except Portfolio.DoesNotExist:
+                return JsonResponse({"error": "No holdings for asset"}, status=400)
+            if portfolio.quantity < quantity:
+                return JsonResponse({"error": "Insufficient asset quantity"}, status=400)
+            portfolio.quantity -= quantity  # locking virtually
+            portfolio.save()
+
+        order = Orders.objects.create(
+            user=user,
+            type=order_type,
+            price=price,
+            quantity=quantity,
+            remaining_quantity=quantity,
+            base_currency=base,
+            quote_currency=quote,
+            status="pending"
+        )
+
+        # Call matching engine
+        match_order(order)
+
+        return JsonResponse({"message": "Order placed successfully"})
+
+    return render(request, "backend/place_order.html")
+
+
+@login_required
+def portfolio_view(request):
+    user = request.user
+    portfolio = Portfolio.objects.filter(user=user)
+
+    # Add current LTP value for each asset
+    enriched_portfolio = []
+    for p in portfolio:
+        try:
+            ltp = Market.objects.get(symbol=p.asset_name).last_traded_price
+        except Market.DoesNotExist:
+            ltp = 0
+        current_value = p.quantity * ltp
+        enriched_portfolio.append({
+            "asset_name": p.asset_name,
+            "quantity": p.quantity,
+            "avg_price": p.avg_purchase_price,
+            "ltp": ltp,
+            "current_value": current_value
+        })
+
+    return render(request, "backend/portfolio.html", {"portfolio": enriched_portfolio})
+
+
+@login_required
+def my_trades_view(request):
+    user = request.user
+    trades = Trades.objects.filter(Q(buyer=user) | Q(seller=user)).order_by("-traded_at")
+    return render(request, "backend/my_trades.html", {"trades": trades})
+
+@login_required
+def my_orders_view(request):
+    orders = Orders.objects.filter(user=request.user).order_by("-created_at")
+    return render(request, "backend/my_orders.html", {"orders": orders})
+
+def order_book_view(request):
+    buy_orders = Orders.objects.filter(
+        status__in=["pending", "partial"], type="buy"
+    ).order_by("-price", "created_at")
+
+    sell_orders = Orders.objects.filter(
+        status__in=["pending", "partial"], type="sell"
+    ).order_by("price", "created_at")
+
+    return render(request, "backend/order_book.html", {
+        "buy_orders": buy_orders,
+        "sell_orders": sell_orders
+    })
+    
+
+def ltp_view(request):
+    ltps = Market.objects.all().order_by("symbol")
+    return render(request, "backend/ltp.html", {"ltps": ltps})
+
+@login_required
+def cancel_order(request, order_id):
+    order = get_object_or_404(Orders, id=order_id, user=request.user)
+    
+    if order.status in ['filled', 'cancelled']:
+        return redirect('order_book')  # can't cancel already executed orders
+
+    # Refund locked amount (quote currency for BUY, base currency for SELL)
+    refund_amount = order.remaining_quantity * order.price if order.type == 'buy' else order.remaining_quantity
+
+    if order.type == 'buy':
+        request.user.wallet.locked_balance += refund_amount
+        request.user.wallet.available_balance += refund_amount
+    else:
+        request.user.wallet.available_balance += refund_amount
+        request.user.wallet.locked_balance -= refund_amount
+
+    request.user.wallet.save()
+
+    order.status = 'cancelled'
+    order.remaining_quantity = 0
+    order.save()
+
+    return redirect('order_book')
+
+@login_required
+def cancel_order(request, order_id):
+    order = get_object_or_404(Orders, id=order_id, user=request.user)
+    
+    if order.status in ['filled', 'cancelled']:
+        return redirect('order_book')  # can't cancel already executed orders
+
+    # Refund locked amount (quote currency for BUY, base currency for SELL)
+    refund_amount = order.remaining_quantity * order.price if order.type == 'buy' else order.remaining_quantity
+
+    if order.type == 'buy':
+        request.user.wallet.locked_balance += refund_amount
+        request.user.wallet.available_balance += refund_amount
+    else:
+        request.user.wallet.available_balance += refund_amount
+        request.user.wallet.locked_balance -= refund_amount
+
+    request.user.wallet.save()
+
+    order.status = 'cancelled'
+    order.remaining_quantity = 0
+    order.save()
+
+    return redirect('order_book')

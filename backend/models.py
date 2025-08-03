@@ -93,8 +93,9 @@ class Portfolio(models.Model):
 # ---------------------
 class Market(models.Model):
     name = models.CharField(max_length=50, default='BITCOIN')         # e.g., Bitcoin
-    symbol = models.CharField(max_length=10, unique=True, default='BTC')  # e.g., BTC
+    symbol = models.CharField(max_length=10, default='BTC')  # e.g., BTC
     last_traded_price = models.DecimalField(max_digits=20, decimal_places=8, default=0)
+    last_updated = models.DateTimeField(auto_now=True)  # ✅ add this
 
     def __str__(self):
         return f"{self.name} - LTP: {self.last_traded_price}"
