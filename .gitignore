@@ -1,0 +1,6 @@
+*.env
+bin/
+Lib/
+venv/
+staticfile_build/
+Scripts/
