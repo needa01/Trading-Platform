@@ -27,8 +27,9 @@ SECRET_KEY = 'django-insecure-4=vqdd3a09cr1u5u&@wuh#p=104&=c#e!)h8s2=&fy-ykay2yb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['trading-y6c1.onrender.com','127.0.0.1']
 
+AUTH_USER_MODEL = 'backend.CustomUser'
 
 # Application definition
 
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'backend',
 ]
 
 MIDDLEWARE = [
