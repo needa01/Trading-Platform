@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<h2>Buy Orders</h2>
+<table border="1">
+  <tr>
+    <th>User</th>
+    <th>Price</th>
+    <th>Qty</th>
+    <th>Remaining</th>
+    <th>Status</th>
+  </tr>
+  {% for order in buy_orders %}
+  <tr>
+    <td>{{ order.user.username }}</td>
+    <td>{{ order.price }}</td>
+    <td>{{ order.quantity }}</td>
+    <td>{{ order.remaining_quantity }}</td>
+    <td>{{ order.status }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h2>Sell Orders</h2>
+<table border="1">
+  <tr>
+    <th>User</th>
+    <th>Price</th>
+    <th>Qty</th>
+    <th>Remaining</th>
+    <th>Status</th>
+  </tr>
+  {% for order in sell_orders %}
+  <tr>
+    <td>{{ order.user.username }}</td>
+    <td>{{ order.price }}</td>
+    <td>{{ order.quantity }}</td>
+    <td>{{ order.remaining_quantity }}</td>
+    <td>{{ order.status }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

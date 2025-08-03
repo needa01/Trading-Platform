@@ -92,11 +92,12 @@ class Portfolio(models.Model):
 # 5. Market Table (LTP)
 # ---------------------
 class Market(models.Model):
-    asset_name = models.CharField(max_length=20, unique=True)
+    name = models.CharField(max_length=50, default='BITCOIN')         # e.g., Bitcoin
+    symbol = models.CharField(max_length=10, unique=True, default='BTC')  # e.g., BTC
     last_traded_price = models.DecimalField(max_digits=20, decimal_places=8, default=0)
 
     def __str__(self):
-        return f"{self.asset_name} - LTP: {self.last_traded_price}"
+        return f"{self.name} - LTP: {self.last_traded_price}"
 
 # ---------------------
 # 6. WalletTransaction Table (Optional but Useful)

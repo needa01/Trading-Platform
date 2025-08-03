@@ -1,3 +1,29 @@
 from django.contrib import admin
 
 # Register your models here.
+from .models import CustomUser, Market, Wallet
+
+@admin.register(CustomUser)
+class CustomUserAdmin(admin.ModelAdmin):
+    model = CustomUser
+    list_display = ['username', 'email', 'fullname', 'is_staff']
+    
+@admin.register(Market)
+class MarketAdmin(admin.ModelAdmin):
+    list_display = ['name', 'symbol', 'last_traded_price']
+    search_fields = ['name', 'symbol']
+    
+
+
+@admin.register(Wallet)
+class WalletAdmin(admin.ModelAdmin):
+    list_display = ['user', 'available_balance', 'locked_balance']
+    actions = ['add_funds']
+
+    def add_funds(self, request, queryset):
+        for wallet in queryset:
+            wallet.available_balance += 10000  # for example
+            wallet.save()
+        self.message_user(request, "Added 10,000 units to selected wallets.")
+
+    add_funds.short_description = "Add 10,000 to available balance"

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Trade History</h2>
+<table border="1">
+  <tr>
+    <th>Time</th>
+    <th>Asset</th>
+    <th>Price</th>
+    <th>Qty</th>
+    <th>Buyer</th>
+    <th>Seller</th>
+  </tr>
+  {% for trade in trades %}
+  <tr>
+    <td>{{ trade.traded_at }}</td>
+    <td>{{ trade.buy_order.base_currency }}</td>
+    <td>{{ trade.price }}</td>
+    <td>{{ trade.quantity }}</td>
+    <td>{{ trade.buyer.username }}</td>
+    <td>{{ trade.seller.username }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
