@@ -22,6 +22,9 @@ from django.conf import settings
 class Crypto(models.Model):
     name = models.CharField(max_length=50)
     symbol = models.CharField(max_length=10, default='BTC')
+    
+    def __str__(self):
+        return {self.symbol}
 class Wallet(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wallet')
     crypto=models.ForeignKey(Crypto,on_delete=models.CASCADE, null=True)
