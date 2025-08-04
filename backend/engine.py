@@ -150,7 +150,9 @@ def match_order(order):
     for match in opposite_orders:
         if order.remaining_quantity <= 0:
             break
-
+        
+        if match.user == order.user:
+            continue
         trade_qty = min(order.remaining_quantity, match.remaining_quantity)
         execution_price = match.price  # Use maker's price
 
