@@ -18,11 +18,18 @@ from django.conf import settings
 # ---------------------
 # 1. Wallet Table
 # ---------------------
+
+class Crypto(models.Model):
+    name = models.CharField(max_length=50)
+    symbol = models.CharField(max_length=10, default='BTC')
 class Wallet(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wallet')
+    crypto=models.ForeignKey(Crypto,on_delete=models.CASCADE, null=True)
     available_balance = models.DecimalField(max_digits=20, decimal_places=8, default=0)
     locked_balance = models.DecimalField(max_digits=20, decimal_places=8, default=0)
 
+    class Meta:
+        unique_together = ('user', 'crypto')
     def __str__(self):
         return f"{self.user.username}'s Wallet"
 
