@@ -49,7 +49,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": ["redis://default:ASPQAAIjcDE2MjE0NTE1ZjljYzY0MDQ1YjBhM2IxYTViMzNkZjQ1OXAxMA@beloved-bengal-9168.upstash.io:6379"],  # adjust host/port if deployed
+            "hosts": ["rediss://default:ASPQAAIjcDE2MjE0NTE1ZjljYzY0MDQ1YjBhM2IxYTViMzNkZjQ1OXAxMA@beloved-bengal-9168.upstash.io:6379"],  # adjust host/port if deployed
         },
     },
 }
