@@ -17,7 +17,7 @@ class MarketAdmin(admin.ModelAdmin):
 
 @admin.register(Wallet)
 class WalletAdmin(admin.ModelAdmin):
-    list_display = ['user', 'available_balance', 'locked_balance']
+    list_display = ['user','crypto', 'available_balance', 'locked_balance']
     actions = ['add_funds']
 
     def add_funds(self, request, queryset):

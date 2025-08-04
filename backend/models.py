@@ -25,6 +25,7 @@ class Crypto(models.Model):
     
     def __str__(self):
         return {self.symbol}
+    
 class Wallet(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wallet')
     crypto=models.ForeignKey(Crypto,on_delete=models.CASCADE, null=True)
