@@ -66,8 +66,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'tradingplatform.urls'
 
-LOGIN_URL = '/'  # default, matches Django auth view
-LOGIN_REDIRECT_URL = 'trade-history/'
+LOGIN_URL = 'login/'  # default, matches Django auth view
+LOGIN_REDIRECT_URL = '/trade-history/'
 
 TEMPLATES = [
     {
