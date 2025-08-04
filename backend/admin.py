@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import CustomUser, Market, Wallet
+from .models import CustomUser, Market, Portfolio, Wallet
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
@@ -27,3 +27,14 @@ class WalletAdmin(admin.ModelAdmin):
         self.message_user(request, "Added 10,000 units to selected wallets.")
 
     add_funds.short_description = "Add 10,000 to available balance"
+    
+@admin.register(Portfolio)
+class PortfolioAdmin(admin.ModelAdmin):
+    list_display = ('user', 'asset_name', 'quantity', 'avg_purchase_price')
+    search_fields = ('user__username', 'asset_name')
+    list_filter = ('asset_name',)
+    ordering = ('user__username', 'asset_name')
+
+    def total_value(self):
+        return self.quantity * self.avg_purchase_price
+    total_value.short_description = 'Total Value'
