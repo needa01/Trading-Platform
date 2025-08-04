@@ -1,8 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<head><audio id="tradeSound" src="{% static 'sounds/notification.mp3' %}" preload="auto"></audio>
+<head>
+  <audio id="tradeSound" src="{% static 'sounds/notification.mp3' %}" preload="auto"></audio>
 </head>
+
 <h2>Trade History</h2>
 
 <!-- Static Table -->
@@ -46,5 +49,4 @@ tradeSocket.onmessage = function(event) {
     document.getElementById("tradeSound").play();
 };
 </script>
-
 {% endblock %}
