@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-
+<head><audio id="tradeSound" src="{% static 'sounds/notification.mp3' %}" preload="auto"></audio>
+</head>
 <h2>Trade History</h2>
+
+<!-- Static Table -->
 <table border="1">
   <tr>
     <th>Time</th>
@@ -15,7 +18,7 @@
   {% for trade in trades %}
   <tr>
     <td>{{ trade.traded_at }}</td>
-    <td>{{ trade.buy_order.base_currency }}</td>
+    <td>{{ trade.buy_order.base_currency }}/{{ trade.buy_order.quote_currency }}</td>
     <td>{{ trade.price }}</td>
     <td>{{ trade.quantity }}</td>
     <td>{{ trade.buyer.username }}</td>
@@ -23,4 +26,25 @@
   </tr>
   {% endfor %}
 </table>
+
+<!-- Realtime Feed -->
+<h3>🔴 Live Trade Feed</h3>
+<div id="trade-feed" style="margin-top: 20px; font-family: monospace; white-space: pre-wrap;"></div>
+
+<!-- Sound -->
+<audio id="tradeSound" src="{% static 'sounds/notification.mp3' %}" preload="auto"></audio>
+
+<script>
+const tradeSocket = new WebSocket('ws://' + window.location.host + '/ws/tradehistory/');
+
+tradeSocket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    const line = `${data.time} - ${data.asset} - ${data.price} (${data.quantity})`;
+    const feed = document.getElementById("trade-feed");
+    feed.innerHTML = line + "<br>" + feed.innerHTML;
+
+    document.getElementById("tradeSound").play();
+};
+</script>
+
 {% endblock %}
