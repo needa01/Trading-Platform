@@ -57,7 +57,7 @@ def place_order(request):
         elif order_type == "sell":
             try:
                 # ✅ Use base.symbol because Portfolio stores asset_name as CharField
-                portfolio = Portfolio.objects.select_for_update().get(user=user, asset_name=base.symbol)
+                portfolio = Portfolio.objects.select_for_update().get(user=user, asset=base.symbol)
             except Portfolio.DoesNotExist:
                 return JsonResponse({"error": "No holdings for asset"}, status=400)
             if portfolio.quantity < quantity:
@@ -95,12 +95,12 @@ def portfolio_view(request):
     enriched_portfolio = []
     for p in portfolio:
         try:
-            ltp = Market.objects.get(symbol=p.asset_name).last_traded_price
+            ltp = Market.objects.get(symbol=p.asset__name).last_traded_price
         except Market.DoesNotExist:
             ltp = 0
         current_value = p.quantity * ltp
         enriched_portfolio.append({
-            "asset_name": p.asset_name,
+            "asset_name": p.asset__symbol,
             "quantity": p.quantity,
             "avg_price": p.avg_purchase_price,
             "ltp": ltp,
