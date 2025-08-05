@@ -74,8 +74,9 @@ def place_order(request):
                 return JsonResponse({"error": "Insufficient asset quantity"}, status=400)
             print("Checkpoint 5")
             
-            portfolio.quantity -= quantity  # Locking virtually
-            portfolio.save()
+            wallet.available_balance -= quantity
+            wallet.locked_balance += quantity
+            wallet.save()
 
         order = Orders.objects.create(
             user=user,
