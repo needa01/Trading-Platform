@@ -165,8 +165,8 @@ def match_order(order):
         total_trade_amount = trade_qty * execution_price
 
         # Wallet update
-        buyer_wallet = Wallet.objects.select_for_update().get(user=buyer)
-        seller_wallet = Wallet.objects.select_for_update().get(user=seller)
+        buyer_wallet = Wallet.objects.select_for_update().get(user=buyer, crypto=quote) 
+        seller_wallet = Wallet.objects.select_for_update().get(user=seller, crypto=quote) 
 
         buyer_wallet.locked_balance -= total_trade_amount
         seller_wallet.available_balance += total_trade_amount
