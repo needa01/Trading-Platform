@@ -44,7 +44,7 @@ def place_order(request):
         except Currency.DoesNotExist:
             return JsonResponse({"error": "Invalid base or quote currency"}, status=400)
 
-        wallet = Wallet.objects.select_for_update().get(user=user)
+        wallet = Wallet.objects.select_for_update().get(user=user, crypto=quote if order_type == "buy" else base)
 
         if order_type == "buy":
             total_cost = price * quantity
