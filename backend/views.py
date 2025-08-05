@@ -44,7 +44,7 @@ def place_order(request):
         except Currency.DoesNotExist:
             return JsonResponse({"error": "Invalid base or quote currency"}, status=400)
 
-        wallet = Wallet.objects.select_for_update().get(user=user, crypto__symbol=quote if order_type == "buy" else base)
+        wallet = Wallet.objects.select_for_update().get(user=user, crypto__symbol=quote.symbol if order_type == "buy" else base.symbol)
 
         if order_type == "buy":
             total_cost = price * quantity
@@ -57,7 +57,7 @@ def place_order(request):
         elif order_type == "sell":
             try:
                 # ✅ Use base.symbol because Portfolio stores asset_name as CharField
-                portfolio = Portfolio.objects.select_for_update().get(user=user, asset__symbol=base)
+                portfolio = Portfolio.objects.select_for_update().get(user=user, asset__symbol=base.symbol)
             except Portfolio.DoesNotExist:
                 return JsonResponse({"error": "No holdings for asset"}, status=400)
             if portfolio.quantity < quantity:
