@@ -58,7 +58,7 @@ def place_order(request):
         elif order_type == "sell":
             try:
                 # ✅ Use base.symbol because Portfolio stores asset_name as CharField
-                portfolio = Portfolio.objects.select_for_update().get(user=user, asset__symbol=base.symbol)
+                portfolio = Portfolio.objects.select_for_update().get(user=user, asset=base)
             except Portfolio.DoesNotExist:
                 return JsonResponse({"error": "No holdings for asset"}, status=400)
             if portfolio.quantity < quantity:
