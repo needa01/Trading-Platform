@@ -10,8 +10,8 @@ class CustomUserAdmin(admin.ModelAdmin):
 
 @admin.register(Currency)
 class CryptoAdmin(admin.ModelAdmin):
-    list_display = ('name', 'symbol')
-    search_fields = ('name', 'symbol')
+    list_display = ('name', 'symbol', 'is_crypto')
+    search_fields = ('name', 'symbol','is_crypto')
     
 @admin.register(Market)
 class MarketAdmin(admin.ModelAdmin):
