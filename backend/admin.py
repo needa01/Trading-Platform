@@ -1,12 +1,17 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import CustomUser, Market, Portfolio, Wallet
+from .models import Crypto, CustomUser, Market, Portfolio, Wallet
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
     model = CustomUser
     list_display = ['username', 'email', 'fullname', 'is_staff']
+
+@admin.register(Crypto)
+class CryptoAdmin(admin.ModelAdmin):
+    list_display = ('name', 'symbol')
+    search_fields = ('name', 'symbol')
     
 @admin.register(Market)
 class MarketAdmin(admin.ModelAdmin):
