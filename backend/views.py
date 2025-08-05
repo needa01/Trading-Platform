@@ -36,8 +36,13 @@ def place_order(request):
         order_type = request.POST.get("type")  # 'buy' or 'sell'
         price = Decimal(request.POST.get("price"))
         quantity = Decimal(request.POST.get("quantity"))
-        base = request.POST.get("base_currency")   # e.g., BTC
-        quote = request.POST.get("quote_currency") # e.g., USDT
+
+        # ✅ Convert base and quote from ID to model instance
+        try:
+            base = Currency.objects.get(id=request.POST.get("base_currency"))
+            quote = Currency.objects.get(id=request.POST.get("quote_currency"))
+        except Currency.DoesNotExist:
+            return JsonResponse({"error": "Invalid base or quote currency"}, status=400)
 
         wallet = Wallet.objects.select_for_update().get(user=user)
 
@@ -51,12 +56,13 @@ def place_order(request):
 
         elif order_type == "sell":
             try:
-                portfolio = Portfolio.objects.select_for_update().get(user=user, asset_name=base)
+                # ✅ Use base.symbol because Portfolio stores asset_name as CharField
+                portfolio = Portfolio.objects.select_for_update().get(user=user, asset_name=base.symbol)
             except Portfolio.DoesNotExist:
                 return JsonResponse({"error": "No holdings for asset"}, status=400)
             if portfolio.quantity < quantity:
                 return JsonResponse({"error": "Insufficient asset quantity"}, status=400)
-            portfolio.quantity -= quantity  # locking virtually
+            portfolio.quantity -= quantity  # Locking virtually
             portfolio.save()
 
         order = Orders.objects.create(
@@ -73,8 +79,9 @@ def place_order(request):
         # Call matching engine
         match_order(order)
 
-
         return JsonResponse({"message": "Order placed successfully"})
+
+    # GET request
     cryptos = Currency.objects.all()
     return render(request, "backend/place_order.html", {"cryptos": cryptos})
 
