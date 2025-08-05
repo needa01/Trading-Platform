@@ -19,16 +19,17 @@ from django.conf import settings
 # 1. Wallet Table
 # ---------------------
 
-class Crypto(models.Model):
+class Currency(models.Model):
     name = models.CharField(max_length=50)
     symbol = models.CharField(max_length=10, default='BTC')
+    is_crypto= models.BooleanField(default='True')
     
     def __str__(self):
         return self.symbol
     
 class Wallet(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wallet')
-    crypto=models.ForeignKey(Crypto,on_delete=models.CASCADE, null=True)
+    crypto=models.ForeignKey(Currency,on_delete=models.CASCADE, null=True)
     available_balance = models.DecimalField(max_digits=20, decimal_places=8, default=0)
     locked_balance = models.DecimalField(max_digits=20, decimal_places=8, default=0)
 
@@ -62,8 +63,8 @@ class Orders(models.Model):
     quantity = models.DecimalField(max_digits=20, decimal_places=8)
     remaining_quantity = models.DecimalField(max_digits=20, decimal_places=8)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
-    base_currency = models.ForeignKey(Crypto, on_delete=models.CASCADE, related_name='base',null=True)   # e.g. BTC
-    quote_currency = models.ForeignKey(Crypto, on_delete=models.CASCADE, related_name='quote',null=True)  
+    base_currency = models.ForeignKey(Currency, on_delete=models.CASCADE, related_name='base',null=True)   # e.g. BTC
+    quote_currency = models.ForeignKey(Currency, on_delete=models.CASCADE, related_name='quote',null=True)  
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
