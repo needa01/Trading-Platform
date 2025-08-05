@@ -28,7 +28,7 @@ class Currency(models.Model):
         return self.symbol
     
 class Wallet(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wallet')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wallet')
     crypto=models.ForeignKey(Currency,on_delete=models.CASCADE, null=True)
     available_balance = models.DecimalField(max_digits=20, decimal_places=8, default=0)
     locked_balance = models.DecimalField(max_digits=20, decimal_places=8, default=0)
