@@ -21,11 +21,19 @@
         <label>Quantity:</label><br>
         <input type="number" step="0.00000001" name="quantity" required><br><br>
 
-        <label>Base Currency (e.g., BTC):</label><br>
-        <input type="text" name="base_currency" required><br><br>
+        <label>Base Currency:</label><br>
+        <select name="base_currency" required>
+            {% for crypto in cryptos %}
+                <option value="{{ crypto.id }}">{{ crypto.symbol }}</option>
+            {% endfor %}
+        </select><br><br>
 
-        <label>Quote Currency (e.g., USDT):</label><br>
-        <input type="text" name="quote_currency" required><br><br>
+        <label>Quote Currency:</label><br>
+        <select name="quote_currency" required>
+            {% for crypto in cryptos %}
+                <option value="{{ crypto.id }}">{{ crypto.symbol }}</option>
+            {% endfor %}
+        </select><br><br>
 
         <button type="submit">Submit Order</button>
     </form>

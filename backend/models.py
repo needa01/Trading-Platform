@@ -62,8 +62,8 @@ class Orders(models.Model):
     quantity = models.DecimalField(max_digits=20, decimal_places=8)
     remaining_quantity = models.DecimalField(max_digits=20, decimal_places=8)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
-    base_currency = models.CharField(max_length=10)   # e.g. BTC
-    quote_currency = models.CharField(max_length=10)  # e.g. USDT
+    base_currency = models.ForeignKey(Crypto, on_delete=models.CASCADE, related_name='base',null=True)   # e.g. BTC
+    quote_currency = models.ForeignKey(Crypto, on_delete=models.CASCADE, related_name='quote',null=True)  
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
