@@ -12,9 +12,17 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+       migrations.AlterUniqueTogether(
+            name='portfolio',
+            unique_together=set(),
+        ),
         migrations.AlterField(
             model_name='wallet',
             name='user',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='wallet', to=settings.AUTH_USER_MODEL),
+        ),
+        migrations.RemoveField(
+            model_name='portfolio',
+            name='asset_name',
         ),
     ]

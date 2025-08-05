@@ -35,10 +35,10 @@ class WalletAdmin(admin.ModelAdmin):
     
 @admin.register(Portfolio)
 class PortfolioAdmin(admin.ModelAdmin):
-    list_display = ('user', 'asset_name', 'quantity', 'avg_purchase_price')
-    search_fields = ('user__username', 'asset_name')
-    list_filter = ('asset_name',)
-    ordering = ('user__username', 'asset_name')
+    list_display = ('user', 'asset', 'quantity', 'avg_purchase_price')
+    search_fields = ('user__username','asset')
+    list_filter = ('asset',)
+    ordering = ('user__username','asset')
 
     def total_value(self):
         return self.quantity * self.avg_purchase_price
