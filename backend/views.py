@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 from backend.engine import match_order
-from .models import Market, Orders, Portfolio, Trades, Wallet
+from .models import Currency, Market, Orders, Portfolio, Trades, Wallet
 
 @login_required
 def staff_order_book(request):
@@ -73,9 +73,10 @@ def place_order(request):
         # Call matching engine
         match_order(order)
 
-        return JsonResponse({"message": "Order placed successfully"})
 
-    return render(request, "backend/place_order.html")
+        return JsonResponse({"message": "Order placed successfully"})
+    cryptos = Currency.objects.all()
+    return render(request, "backend/place_order.html", {"cryptos": cryptos})
 
 
 @login_required
