@@ -174,7 +174,7 @@ def match_order(order):
         seller_wallet.save()
 
         # Portfolio update for buyer
-        portfolio, _ = Portfolio.objects.get_or_create(user=buyer, asset_name=base)
+        portfolio, _ = Portfolio.objects.get_or_create(user=buyer, asset=base)
         old_total = portfolio.quantity * portfolio.avg_purchase_price
         portfolio.quantity += trade_qty
         portfolio.avg_purchase_price = (

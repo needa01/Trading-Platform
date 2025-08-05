@@ -90,7 +90,7 @@ class Trades(models.Model):
 # ---------------------
 class Portfolio(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='portfolio')
-    asset = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='currency', null=True)
+    asset = models.ForeignKey(Currency, on_delete=models.CASCADE, related_name='currency', null=True)
     quantity = models.DecimalField(max_digits=20, decimal_places=8, default=0)
     avg_purchase_price = models.DecimalField(max_digits=20, decimal_places=8, default=0)
 
@@ -98,7 +98,7 @@ class Portfolio(models.Model):
         unique_together = ('user', 'asset')
 
     def __str__(self):
-        return f"{self.user.username} - {self.asset_name}: {self.quantity}"
+        return f"{self.user.username} - {self.asset}: {self.quantity}"
 
 # ---------------------
 # 5. Market Table (LTP)

@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 from backend.engine import match_order
-from .models import Currency, Market, Orders, Portfolio, Trades, Wallet
+from .models import Currency, CustomUser, Market, Orders, Portfolio, Trades, Wallet
 
 @login_required
 def staff_order_book(request):
@@ -33,19 +33,23 @@ def staff_trades(request):
 def place_order(request):
     if request.method == "POST":
         user = request.user
+        # user=CustomUser.objects.get(id=user.)
         order_type = request.POST.get("type")  # 'buy' or 'sell'
         price = Decimal(request.POST.get("price"))
         quantity = Decimal(request.POST.get("quantity"))
 
         # ✅ Convert base and quote from ID to model instance
+        print("Checkpoint 1")
         try:
             base = Currency.objects.get(id=request.POST.get("base_currency"))
             quote = Currency.objects.get(id=request.POST.get("quote_currency"))
         except Currency.DoesNotExist:
             return JsonResponse({"error": "Invalid base or quote currency"}, status=400)
+        print("Checkpoint 2")
         
         crypto = quote if order_type == "buy" else base
         wallet = Wallet.objects.select_for_update().get(user=user, crypto=crypto)
+        print("Checkpoint 3")
 
         if order_type == "buy":
             total_cost = price * quantity
@@ -54,15 +58,22 @@ def place_order(request):
             wallet.available_balance -= total_cost
             wallet.locked_balance += total_cost
             wallet.save()
+            print("Checkpoint 4")
 
         elif order_type == "sell":
             try:
-                # ✅ Use base.symbol because Portfolio stores asset_name as CharField
+                # ✅ Use base.symbol because Portfolio stores asset as CharField
+                print("Checkpoint 5.1")
+                
                 portfolio = Portfolio.objects.select_for_update().get(user=user, asset=base)
+                print("Checkpoint 5")
+                
             except Portfolio.DoesNotExist:
                 return JsonResponse({"error": "No holdings for asset"}, status=400)
             if portfolio.quantity < quantity:
                 return JsonResponse({"error": "Insufficient asset quantity"}, status=400)
+            print("Checkpoint 5")
+            
             portfolio.quantity -= quantity  # Locking virtually
             portfolio.save()
 
@@ -101,7 +112,7 @@ def portfolio_view(request):
             ltp = 0
         current_value = p.quantity * ltp
         enriched_portfolio.append({
-            "asset_name": p.asset__symbol,
+            "asset": p.asset__symbol,
             "quantity": p.quantity,
             "avg_price": p.avg_purchase_price,
             "ltp": ltp,
