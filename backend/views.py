@@ -39,8 +39,8 @@ def place_order(request):
 
         # ✅ Convert base and quote from ID to model instance
         try:
-            base = Currency.objects.get(symbol=request.POST.get("base_currency"))
-            quote = Currency.objects.get(symbol=request.POST.get("quote_currency"))
+            base = Currency.objects.get(id=request.POST.get("base_currency"))
+            quote = Currency.objects.get(id=request.POST.get("quote_currency"))
         except Currency.DoesNotExist:
             return JsonResponse({"error": "Invalid base or quote currency"}, status=400)
 
