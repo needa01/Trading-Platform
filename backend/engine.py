@@ -153,6 +153,7 @@ def match_order(order):
         
         if match.user == order.user:
             continue
+
         trade_qty = min(order.remaining_quantity, match.remaining_quantity)
         execution_price = match.price  # Use maker's price
 
@@ -173,7 +174,7 @@ def match_order(order):
         buyer_wallet.save()
         seller_wallet.save()
 
-        # Portfolio update for buyer
+        # ✅ Buyer Portfolio update
         portfolio, _ = Portfolio.objects.get_or_create(user=buyer, asset=base)
         old_total = portfolio.quantity * portfolio.avg_purchase_price
         portfolio.quantity += trade_qty
@@ -182,7 +183,12 @@ def match_order(order):
         )
         portfolio.save()
 
-        # Create trade record
+        # ✅ Seller Portfolio deduction (missing earlier)
+        seller_portfolio = Portfolio.objects.select_for_update().get(user=seller, asset=base)
+        seller_portfolio.quantity -= trade_qty
+        seller_portfolio.save()
+
+        # Record trade
         trade = Trades.objects.create(
             buy_order=buy_order,
             sell_order=sell_order,
